@@ -83,7 +83,7 @@ def Listen():
     while True:
         sock, addr = s.accept()
         if TargetCheck(sock):
-            print('\n\033[0;32;48m[+]\033[0mTarget \033[0;33;48m%s\033[0m : %s login.' % addr)
+            print('\n\033[0;32;48m[+]\033[0mTarget \033[0;33;48m%s\033[0m : %s login.\n' % addr)
             return sock
 
 # 目标有效性检查

@@ -52,7 +52,7 @@ def PassCheck(sock):
             return False
         
 
-# 主功能
+# 主程序
 if ACTIVE == 0:
     s = Passive()
 else:
@@ -60,11 +60,10 @@ else:
 while True:
     # 每次最多接收1k字节:
     d = s.recv(1024)
-    if d:
-        buffer.append(d)
-    else:
+    if d == b'0':
+        s.send(b'Bye')
         break
-data = b''.join(buffer)
-data = data.decode('utf-8')
-print(data)
+    elif d == b'1':
+        print('ok')
+print('bye')
 s.close()
