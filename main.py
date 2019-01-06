@@ -22,6 +22,66 @@ def Functions():
     print('[3] File Management')
     print('[0] Exit\n')
 
+# 系统信息
+def Information(sock):
+    sock.send(b'1')
+    buffer = []
+    while True:
+        d = sock.recv(1024)
+        if d != b'End':
+            buffer.append(d)
+        else:
+            break
+    data = b''.join(buffer)
+    data = data.decode('utf-8')
+    info = data.split('@',1)
+    print('\n%s\n' % info[1])
+    if info[0] == 'nt':
+        return
+    else:
+        while True:
+            print('\033[0;32;48m[+]\033[0m More Info:')
+            print('[1] CPU Info')
+            print('[2] Mem Info')
+            print('[3] USB Info')
+            print('[0] Exit\n')
+            if Linuxinfo(sock):
+                break
+        return
+
+# Linux系统信息
+def Linuxinfo(sock):
+    while True:
+        Input = input('>>> Information ID: ')
+        if not Input:
+            print('\033[0;33;48m[-]\033[0mYou must choose one function.\n')
+        elif Input.isdecimal():
+            Input = int(Input)
+            if Input == 0:
+                return True
+            elif Input == 1:
+                sock.send(b'0x01')
+                buffer = []
+                while True:
+                    d = sock.recv(1024)
+                    if d != b'End':
+                        buffer.append(d)
+                    else:
+                        break
+                data = b''.join(buffer)
+                data = data.decode('utf-8')
+                print('\n%s\n' % data)
+                return False
+            elif Input == 2:
+                print('2')
+            elif Input == 3:
+                print('3')
+            else:
+                print('\033[0;33;48m[-]\033[0mWrong ID. Please choose another one (? to get list).\n')
+        else:
+            print('\033[0;33;48m[-]\033[0mWrong Input.You must choose a correct function (? to get list).\n')
+
+
 # 主程序
 print('\n\n')
 print('          \033[0;33;48m\\\\\033[0m  \033[0;34;48mPython\033[0m   \033[0;31;48m//\033[0m')
@@ -69,7 +129,7 @@ while True:
             print('\033[0;32;48m[+]\033[0mGoodBye~\n')
             break
         elif Input == 1:
-            print('1')
+            Information(s)
         elif Input == 2:
             print('2')
         elif Input == 3:

