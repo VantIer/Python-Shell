@@ -74,11 +74,25 @@ def Getinfo(sock):
         f.close()
         data = data.encode('utf-8')
         sock.send(data)
-        print(data)
         sock.send(b'End')
         os.system('rm -f info.txt')
         return
 
+# 获取更多信息
+def GetMoreinfo(sock,target):
+    if target == 'CPU':
+        os.system('cat /proc/cpuinfo >> info.txt')
+    elif target == 'MEM':
+        os.system('cat /proc/meminfo >> info.txt')
+    elif target == 'USB':
+        os.system('lsusb -tv >> info.txt')
+    f = open('info.txt','r')
+    data = f.read()
+    f.close()
+    data = data.encode('utf-8')
+    sock.send(data)
+    sock.send(b'End')
+    os.system('rm -f info.txt')
 
 # 主程序
 if ACTIVE == 0:
@@ -94,5 +108,11 @@ while True:
         break
     elif d == b'1':
         Getinfo(s)
+    elif d == b'0x01':
+        GetMoreinfo(s,'CPU')
+    elif d == b'0x02':
+        GetMoreinfo(s,'MEM')
+    elif d == b'0x03':
+        GetMoreinfo(s,'USB')
 print('bye')
 s.close()

@@ -59,8 +59,13 @@ def Linuxinfo(sock):
             Input = int(Input)
             if Input == 0:
                 return True
-            elif Input == 1:
-                sock.send(b'0x01')
+            elif Input == 1 or Input == 2 or Input == 3:
+                if Input == 1:
+                    sock.send(b'0x01')
+                elif Input == 2:
+                    sock.send(b'0x02')
+                elif Input == 3:
+                    sock.send(b'0x03')
                 buffer = []
                 while True:
                     d = sock.recv(1024)
@@ -72,10 +77,6 @@ def Linuxinfo(sock):
                 data = data.decode('utf-8')
                 print('\n%s\n' % data)
                 return False
-            elif Input == 2:
-                print('2')
-            elif Input == 3:
-                print('3')
             else:
                 print('\033[0;33;48m[-]\033[0mWrong ID. Please choose another one (? to get list).\n')
         else:
