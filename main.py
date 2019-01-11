@@ -61,11 +61,11 @@ def Linuxinfo(sock):
                 return True
             elif Input == 1 or Input == 2 or Input == 3:
                 if Input == 1:
-                    sock.send(b'0x01')
+                    sock.send(b'1x01')
                 elif Input == 2:
-                    sock.send(b'0x02')
+                    sock.send(b'1x02')
                 elif Input == 3:
-                    sock.send(b'0x03')
+                    sock.send(b'1x03')
                 buffer = []
                 while True:
                     d = sock.recv(1024)
@@ -82,6 +82,20 @@ def Linuxinfo(sock):
         else:
             print('\033[0;33;48m[-]\033[0mWrong Input.You must choose a correct function (? to get list).\n')
 
+# 进程管理
+def Process(sock):
+    sock.send(b'2')
+    buffer = []
+    while True:
+        d = sock.recv(1024)
+        if d != b'End':
+            buffer.append(d)
+        else:
+            break
+    data = b''.join(buffer)
+    data = data.decode('utf-8')
+    print('\n%s\n' % data)
+    return
 
 # 主程序
 print('\n\n')
