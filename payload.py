@@ -119,10 +119,20 @@ def Process(sock):
 
 # Kill进程 by Name
 def KillName(sock):
+    d = sock.recv(1024)
+    name = d.decode('utf-8')
+    if SYS == 'nt':
+        os.system('taskkill /f /im %s' %name)
     return
 
 # Kill进程 by ID
 def KillId(sock):
+    d = sock.recv(1024)
+    id = d.decode('utf-8')
+    if SYS == 'nt':
+        os.system('taskkill /f /pid %s' %id)
+    else:
+        os.system('kill -9 %s' %id)
     return
 
 # 主程序

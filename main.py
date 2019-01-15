@@ -98,7 +98,7 @@ def Process(sock):
     print('\n%s\n' % data)
     while True:
         print('\033[0;32;48m[+]\033[0m More Info:')
-        print('[1] Kill by Name')
+        print('[1] Kill by Name (Only for Win)')
         print('[2] Kill by ID')
         print('[3] USB Info')
         print('[0] Exit\n')
