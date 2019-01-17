@@ -15,6 +15,19 @@ ACTIVE = 1
 # 黄色 \033[0;33;48m[-]\033[0m
 # 蓝色 \033[0;36;48m[*]\033[0m
 
+# 接受数据（大数据，需要按照1024分段）
+def Receive(sock):
+    buffer = []
+    while True:
+        d = sock.recv(1024)
+        if d != b'End':
+            buffer.append(d)
+        else:
+            break
+    data = b''.join(buffer)
+    data = data.decode('utf-8')
+    return data
+
 # 功能列表
 def Functions():
     print('\033[0;32;48m[+]\033[0m Functions:')
@@ -26,15 +39,7 @@ def Functions():
 # 系统信息
 def Information(sock):
     sock.send(b'1')
-    buffer = []
-    while True:
-        d = sock.recv(1024)
-        if d != b'End':
-            buffer.append(d)
-        else:
-            break
-    data = b''.join(buffer)
-    data = data.decode('utf-8')
+    data = Receive(sock)
     info = data.split('@',1)
     print('\n%s\n' % info[1])
     if info[0] == 'nt':
@@ -67,47 +72,31 @@ def Linuxinfo(sock):
                     sock.send(b'1x02')
                 elif Input == 3:
                     sock.send(b'1x03')
-                buffer = []
-                while True:
-                    d = sock.recv(1024)
-                    if d != b'End':
-                        buffer.append(d)
-                    else:
-                        break
-                data = b''.join(buffer)
-                data = data.decode('utf-8')
+                data = Receive(sock)
                 print('\n%s\n' % data)
                 return False
             else:
-                print('\033[0;33;48m[-]\033[0mWrong ID. Please choose another one (? to get list).\n')
+                print('\033[0;33;48m[-]\033[0mWrong ID. Please choose another one.\n')
         else:
-            print('\033[0;33;48m[-]\033[0mWrong Input.You must choose a correct function (? to get list).\n')
+            print('\033[0;33;48m[-]\033[0mWrong Input.You must choose a correct function.\n')
 
 # 进程管理
 def Process(sock):
     sock.send(b'2')
-    buffer = []
-    while True:
-        d = sock.recv(1024)
-        if d != b'End':
-            buffer.append(d)
-        else:
-            break
-    data = b''.join(buffer)
-    data = data.decode('utf-8')
+    data = Receive(sock)
     print('\n%s\n' % data)
     while True:
-        print('\033[0;32;48m[+]\033[0m More Info:')
-        print('[1] Kill by Name (Only for Win)')
-        print('[2] Kill by ID')
-        print('[3] Process List')
-        print('[0] Exit\n')
         if Processmanage(sock):
             break
     return
 
 # 进程操作
 def Processmanage(sock):
+    print('\033[0;32;48m[+]\033[0m More Info:')
+    print('[1] Kill by Name (Only for Win)')
+    print('[2] Kill by ID')
+    print('[3] Process List')
+    print('[0] Exit\n')
     while True:
         Input = input('>>> Order ID: ')
         if not Input:
@@ -129,15 +118,7 @@ def Processmanage(sock):
                     sock.send(Input)
                 elif Input == 3:
                     sock.send(b'2')
-                    buffer = []
-                    while True:
-                        d = sock.recv(1024)
-                        if d != b'End':
-                            buffer.append(d)
-                        else:
-                            break
-                    data = b''.join(buffer)
-                    data = data.decode('utf-8')
+                    data = Receive(sock)
                     print('\n%s\n' % data)
                     return False
                 d = sock.recv(1024)
@@ -145,9 +126,9 @@ def Processmanage(sock):
                 print('\n%s\n' % data)
                 return False
             else:
-                print('\033[0;33;48m[-]\033[0mWrong ID. Please choose another one (? to get list).\n')
+                print('\033[0;33;48m[-]\033[0mWrong ID. Please choose another one.\n')
         else:
-            print('\033[0;33;48m[-]\033[0mWrong Input.You must choose a correct function (? to get list).\n')
+            print('\033[0;33;48m[-]\033[0mWrong Input.You must choose a correct function.\n')
 
 # 主程序
 print('\n\n')
@@ -159,8 +140,7 @@ print('              \033[0;33;48m\\\\\033[0m   \033[0;31;48m//\033[0m')
 print('               \033[0;33;48m\\\\\033[0m \033[0;31;48m//\033[0m')
 print('                \033[0;33;48m\\\033[0m\033[0;36;48mV\033[0m\033[0;31;48m/\033[0m')
 print('\n\n')
-
-# 创建连接
+# 主被动模式选择
 while True:
     Input = input('>>> Active Connect? (Y/N) : ')
     Input = Input.upper()
@@ -174,6 +154,7 @@ while True:
         break
     else:
         print('\033[0;33;48m[-]\033[0mYou should choose a way to connect Target.\n')
+# 创建连接
 if ACTIVE == 1:
     s = connect.Connect()
 else:
@@ -187,15 +168,14 @@ while True:
     elif Input.isdecimal():
         Input = int(Input)
         if Input == 0:
-            while True:
-                s.send(b'0')
-                d = s.recv(1024)
-                data = d.decode('utf-8')
-                if data == 'Bye':
-                    break
-            s.close()
-            print('\033[0;32;48m[+]\033[0mGoodBye~\n')
-            break
+            s.send(b'0')
+            d = s.recv(1024)
+            data = d.decode('utf-8')
+            if data == 'Bye':
+                s.close()
+                print('\033[0;32;48m[+]\033[0mGoodBye~\n')
+                break
+            print('\033[0;31;48m[!]\033[0mMaybe Something Wrong.\n')
         elif Input == 1:
             Information(s)
         elif Input == 2:

