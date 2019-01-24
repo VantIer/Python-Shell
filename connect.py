@@ -105,5 +105,18 @@ def TargetCheck(s):
         print('\033[0;31;48m[!]\033[0mNo Response.\n')
         return False
 
+# 接受数据（大数据，需要按照1024分段）
+def Receive(sock):
+    buffer = []
+    while True:
+        d = sock.recv(1024)
+        if d != b'End':
+            buffer.append(d)
+        else:
+            break
+    data = b''.join(buffer)
+    data = data.decode('utf-8')
+    return data
+
 if __name__=='__main__':
     print('\nI think you should try \033[0;32;48mMAIN.PY\033[0m.    ㄟ( ▔, ▔ )ㄏ\n')

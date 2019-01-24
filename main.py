@@ -3,8 +3,12 @@
 
 # 导入socket库:
 import socket
-import connect
 import time
+import connect
+import information
+import process
+import file
+
 
 # 变量定义 ACTIVE 是否主动连接被控端
 ACTIVE = 1
@@ -15,19 +19,6 @@ ACTIVE = 1
 # 黄色 \033[0;33;48m[-]\033[0m
 # 蓝色 \033[0;36;48m[*]\033[0m
 
-# 接受数据（大数据，需要按照1024分段）
-def Receive(sock):
-    buffer = []
-    while True:
-        d = sock.recv(1024)
-        if d != b'End':
-            buffer.append(d)
-        else:
-            break
-    data = b''.join(buffer)
-    data = data.decode('utf-8')
-    return data
-
 # 功能列表
 def Functions():
     print('\033[0;32;48m[+]\033[0m Functions:')
@@ -35,100 +26,6 @@ def Functions():
     print('[2] Process Management')
     print('[3] File Management')
     print('[0] Exit\n')
-
-# 系统信息
-def Information(sock):
-    sock.send(b'1')
-    data = Receive(sock)
-    info = data.split('@',1)
-    print('\n%s\n' % info[1])
-    if info[0] == 'nt':
-        return
-    else:
-        while True:
-            print('\033[0;32;48m[+]\033[0m More Info:')
-            print('[1] CPU Info')
-            print('[2] Mem Info')
-            print('[3] USB Info')
-            print('[0] Exit\n')
-            if Linuxinfo(sock):
-                break
-        return
-
-# Linux系统信息
-def Linuxinfo(sock):
-    while True:
-        Input = input('>>> Information ID: ')
-        if not Input:
-            print('\033[0;33;48m[-]\033[0mYou must choose one function.\n')
-        elif Input.isdecimal():
-            Input = int(Input)
-            if Input == 0:
-                return True
-            elif Input == 1 or Input == 2 or Input == 3:
-                if Input == 1:
-                    sock.send(b'1x01')
-                elif Input == 2:
-                    sock.send(b'1x02')
-                elif Input == 3:
-                    sock.send(b'1x03')
-                data = Receive(sock)
-                print('\n%s\n' % data)
-                return False
-            else:
-                print('\033[0;33;48m[-]\033[0mWrong ID. Please choose another one.\n')
-        else:
-            print('\033[0;33;48m[-]\033[0mWrong Input.You must choose a correct function.\n')
-
-# 进程管理
-def Process(sock):
-    sock.send(b'2')
-    data = Receive(sock)
-    print('\n%s\n' % data)
-    while True:
-        if Processmanage(sock):
-            break
-    return
-
-# 进程操作
-def Processmanage(sock):
-    print('\033[0;32;48m[+]\033[0m More Info:')
-    print('[1] Kill by Name (Only for Win)')
-    print('[2] Kill by ID')
-    print('[3] Process List')
-    print('[0] Exit\n')
-    while True:
-        Input = input('>>> Order ID: ')
-        if not Input:
-            print('\033[0;33;48m[-]\033[0mYou must choose one function.\n')
-        elif Input.isdecimal():
-            Input = int(Input)
-            if Input == 0:
-                return True
-            elif Input == 1 or Input == 2 or Input == 3:
-                if Input == 1:
-                    sock.send(b'2x01')
-                    Input = input('>>> Process Name: ')
-                    Input = Input.encode('utf-8')
-                    sock.send(Input)
-                elif Input == 2:
-                    sock.send(b'2x02')
-                    Input = input('>>> Process ID: ')
-                    Input = Input.encode('utf-8')
-                    sock.send(Input)
-                elif Input == 3:
-                    sock.send(b'2')
-                    data = Receive(sock)
-                    print('\n%s\n' % data)
-                    return False
-                d = sock.recv(1024)
-                data = d.decode('utf-8')
-                print('\n%s\n' % data)
-                return False
-            else:
-                print('\033[0;33;48m[-]\033[0mWrong ID. Please choose another one.\n')
-        else:
-            print('\033[0;33;48m[-]\033[0mWrong Input.You must choose a correct function.\n')
 
 # 主程序
 print('\n\n')
@@ -177,11 +74,11 @@ while True:
                 break
             print('\033[0;31;48m[!]\033[0mMaybe Something Wrong.\n')
         elif Input == 1:
-            Information(s)
+            information.Information(s)
         elif Input == 2:
-            Process(s)
+            process.Process(s)
         elif Input == 3:
-            print('3')
+            file.File(s)
         else:
             print('\033[0;33;48m[-]\033[0mWrong ID. Please choose another one (? to get list).\n')
     elif Input == '?':

