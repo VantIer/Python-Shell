@@ -105,7 +105,7 @@ def TargetCheck(s):
         print('\033[0;31;48m[!]\033[0mNo Response.\n')
         return False
 
-# 接受数据（大数据，需要按照1024分段）
+# 接受数据（大数据按照1024字节分段传输）
 def Receive(sock):
     buffer = []
     while True:
