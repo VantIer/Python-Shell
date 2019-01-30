@@ -28,7 +28,7 @@ def Shell(sock):
         if not Input:
             print('\033[0;33;48m[-]\033[0mOops...\n')
         elif Input == '0':
-            sock.send(b'exit')
+            sock.send(b'4x00')
             return
         else:
             sock.send(Input.encode('utf-8'))
