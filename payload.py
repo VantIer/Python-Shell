@@ -55,8 +55,15 @@ def PassCheck(sock):
             sock.send(b'NoAccess')
             return False
 
-# 发送数据（发送时候分数据主体和结束符End，中间睡0.1是为了分包,主控端需要单独的一个包判断发送结束，我也不知道为啥不睡就会导致两句代码发送一个包，明明之前就ok，心态炸了）
+# 加密并发送数据（发送时候分数据主体和结束符End，中间睡0.1是为了分包,主控端需要单独的一个包判断发送结束，我也不知道为啥不睡就会导致两句代码发送一个包，明明之前就ok，心态炸了）
 def Send(data,sock):
+    ml = len(data)					  #分别得到密钥和明文的长度
+    kl = len(PASS)
+    key = ml//kl*PASS+PASS[:ml%kl]		  #将密钥复制衔接，使其长度与明文长度一致
+    pwd = []
+    for i in range(len(key)):
+	    pwd.append(chr(ord(key[i])^ord(data[i]))) #一对一异或操作，得到结果,其中,"ord(char)"得到该字符对应的ASCII码,"chr(int)"相反
+    data = ''.join(pwd)
     data = data.encode('utf-8')
     sock.send(data)
     time.sleep(0.1)

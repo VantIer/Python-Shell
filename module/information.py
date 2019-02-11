@@ -8,7 +8,7 @@ __author__ = 'Vantler'
 # 导入socket库:
 import socket
 import time
-import connect
+import module.connect as connect
 
 # 系统信息
 def Information(sock):

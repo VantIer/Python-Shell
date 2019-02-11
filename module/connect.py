@@ -105,7 +105,7 @@ def TargetCheck(s):
         print('\033[0;31;48m[!]\033[0mNo Response.\n')
         return False
 
-# 接受数据（大数据按照1024字节分段传输）
+# 接受数据并解密（大数据按照1024字节分段传输）
 def Receive(sock):
     buffer = []
     while True:
@@ -116,6 +116,14 @@ def Receive(sock):
             break
     data = b''.join(buffer)
     data = data.decode('utf-8')
+    # 密文解密部分，操作与加密完全一致
+    ml = len(data)
+    kl = len(PASS)
+    key = ml//kl*PASS+PASS[:ml%kl]
+    res = []
+    for i in range(len(key)):
+	    res.append(chr(ord(key[i])^ord(data[i]))) #一对一异或操作，得到结果,其中,"ord(char)"得到该字符对应的ASCII码,"chr(int)"相反
+    data = ''.join(res)
     return data
 
 if __name__=='__main__':

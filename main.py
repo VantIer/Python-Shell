@@ -4,10 +4,10 @@
 # 导入socket库:
 import socket
 import time
-import connect
-import information
-import process
-import file
+import module.connect as connect
+import module.information as information
+import module.process as process
+import module.file as file
 
 
 # 变量定义 ACTIVE 是否主动连接被控端
