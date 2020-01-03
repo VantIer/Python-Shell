@@ -12,7 +12,7 @@ import module.connect as connect
 
 # 系统信息
 def Information(sock):
-    sock.send(b'1')
+    sock.send(b'1x00')
     data = connect.Receive(sock)
     info = data.split('@',1)
     print('\n%s\n' % info[1])

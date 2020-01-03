@@ -12,7 +12,7 @@ import module.connect as connect
 
 # 进程管理
 def Process(sock):
-    sock.send(b'2')
+    sock.send(b'2x00')
     data = connect.Receive(sock)
     print('\n%s\n' % data)
     while True:
@@ -37,22 +37,19 @@ def Processmanage(sock):
                 return True
             elif Input == 1 or Input == 2 or Input == 3:
                 if Input == 1:
-                    sock.send(b'2x01')
                     Input = input('>>> Process Name: ')
-                    Input = Input.encode('utf-8')
+                    Input = b'2x01||' + Input.encode('utf-8')
                     sock.send(Input)
                 elif Input == 2:
-                    sock.send(b'2x02')
                     Input = input('>>> Process ID: ')
-                    Input = Input.encode('utf-8')
+                    Input = b'2x02||' + Input.encode('utf-8')
                     sock.send(Input)
                 elif Input == 3:
-                    sock.send(b'2')
+                    sock.send(b'2x00')
                     data = connect.Receive(sock)
                     print('\n%s\n' % data)
                     return False
-                d = sock.recv(1024)
-                data = d.decode('utf-8')
+                data = connect.Receive(sock)
                 print('\n%s\n' % data)
                 return False
             else:

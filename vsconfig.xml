@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<conf>
+	<plugin function="sadasdasdasd" order="X5">default</plugin>
+	<plugin function="sadasdasdasd" order="X1">default</plugin>
+	<plugin function="sadasdasdasd" order="X2">default</plugin>
+	<plugin function="sadasdasdasd" order="X3">default</plugin>
+	<plugin function="sadasdasdasd" order="X4">default</plugin>
+</conf>

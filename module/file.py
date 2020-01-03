@@ -29,7 +29,7 @@ def File(sock):
 
 # 获取文件列表
 def ls(sock):
-    sock.send(b'3')
+    sock.send(b'3x00')
     data = connect.Receive(sock)
     ls = data.split('@V@',1)
     print('\n%s\n' % ls[1])
@@ -40,7 +40,8 @@ def filemanage(sock, dir):
     print('\033[0;32;48m[+]\033[0m Orders:')
     print('[1] Parent directory')
     print('[2] Subdirectory')
-    print('[3] Delete files')
+    print('[3] Delete file')
+    print('[4] New directory')
     print('[0] Exit\n')
     while True:
         Input = input('>>> \033[0;32;48m[%s]\033[0m: ' % dir)
@@ -50,19 +51,21 @@ def filemanage(sock, dir):
             Input = int(Input)
             if Input == 0:
                 return True
-            elif Input == 1 or Input == 2 or Input == 3:
+            elif Input == 1 or Input == 2 or Input == 3 or Input == 4:
                 if Input == 1:
                     sock.send(b'3x01')
                 elif Input == 2:
-                    sock.send(b'3x02')
                     Input = input('>>> Directory name: ')
                     Input = Input.encode('utf-8')
-                    sock.send(Input)
+                    sock.send(b'3x02||' + Input)
                 elif Input == 3:
-                    sock.send(b'3x03')
                     Input = input('>>> Directory / File name: ')
                     Input = Input.encode('utf-8')
-                    sock.send(Input)
+                    sock.send(b'3x03||' + Input)
+                elif Input == 4:
+                    Input = input('>>> Directory name: ')
+                    Input = Input.encode('utf-8')
+                    sock.send(b'3x04||' + Input)
                 return False
             else:
                 print('\033[0;33;48m[-]\033[0mWrong ID. Please choose another one.\n')
